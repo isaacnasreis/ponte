@@ -1,39 +1,30 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { BookMarked, Dumbbell, LucideIcon } from "lucide-react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db, populate } from "@/lib/db";
 import { MainPillar } from "./MainPillar";
 import { SupportPillarCard } from "./SupportPillarCard";
-
-type Pillar = {
-  id: string;
-  title: string;
-  description?: string;
-  type: "main" | "support";
-  progress?: number;
-  next_milestone?: string;
-};
+import { BookMarked, Dumbbell, type LucideIcon } from "lucide-react";
+import { useEffect } from "react";
 
 const iconMap: { [key: string]: LucideIcon } = {
   "Pós-Graduação": BookMarked,
   "Malhar 3x/semana": Dumbbell,
 };
 
-type ClarityDashboardProps = {
-  initialPillars: Pillar[];
-};
-
-export function ClarityDashboard({ initialPillars }: ClarityDashboardProps) {
-  const [mainPillar, setMainPillar] = useState<Pillar | null>(null);
-  const [supportPillars, setSupportPillars] = useState<Pillar[]>([]);
+export function ClarityDashboard() {
+  const pillars = useLiveQuery(() => db.pillars.toArray(), []);
 
   useEffect(() => {
-    const main = initialPillars.find((p) => p.type === "main") || null;
-    const support = initialPillars.filter((p) => p.type === "support");
+    populate();
+  }, []);
 
-    setMainPillar(main);
-    setSupportPillars(support);
-  }, [initialPillars]);
+  if (!pillars) {
+    return <div className="text-center py-16">Carregando seus pilares...</div>;
+  }
+
+  const mainPillar = pillars.find((p) => p.type === "main") || null;
+  const supportPillars = pillars.filter((p) => p.type === "support");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
