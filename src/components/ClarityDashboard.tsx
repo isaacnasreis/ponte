@@ -1,11 +1,17 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { db, populate } from "@/lib/db";
+import { useLiveQuery } from "dexie-react-hooks";
+import {
+  BookMarked,
+  Dumbbell,
+  PlusCircle,
+  type LucideIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { AddPillarForm } from "./AddPillarForm";
 import { MainPillar } from "./MainPillar";
 import { SupportPillarCard } from "./SupportPillarCard";
-import { BookMarked, Dumbbell, type LucideIcon } from "lucide-react";
-import { useEffect } from "react";
 
 const iconMap: { [key: string]: LucideIcon } = {
   "Pós-Graduação": BookMarked,
@@ -14,10 +20,24 @@ const iconMap: { [key: string]: LucideIcon } = {
 
 export function ClarityDashboard() {
   const pillars = useLiveQuery(() => db.pillars.toArray(), []);
+  const [isAddingPillar, setIsAddingPillar] = useState(false);
 
   useEffect(() => {
     populate();
   }, []);
+
+  const handleAddSupportPillar = async (title: string) => {
+    try {
+      await db.pillars.add({
+        title,
+        type: "support",
+        createdAt: new Date(),
+      });
+      setIsAddingPillar(false);
+    } catch (error) {
+      console.error("Falha ao adicionar novo pilar:", error);
+    }
+  };
 
   if (!pillars) {
     return <div className="text-center py-16">Carregando seus pilares...</div>;
@@ -43,19 +63,36 @@ export function ClarityDashboard() {
         </div>
 
         <div className="flex-1 flex flex-col gap-4">
-          <h2 className="font-heading text-xl font-bold px-2">
-            Pilares de Suporte
-          </h2>
-          {supportPillars.map((pillar) => {
-            const IconComponent = iconMap[pillar.title] || BookMarked;
-            return (
-              <SupportPillarCard
-                key={pillar.id}
-                title={pillar.title}
-                Icon={IconComponent}
-              />
-            );
-          })}
+          <div className="flex justify-between items-center px-2">
+            <h2 className="font-heading text-xl font-bold">
+              Pilares de Suporte
+            </h2>
+            <button
+              onClick={() => setIsAddingPillar(true)}
+              className="text-primary hover:text-opacity-80 transition-colors"
+              title="Adicionar novo pilar de suporte"
+            >
+              <PlusCircle size={24} />
+            </button>
+          </div>
+
+          {isAddingPillar ? (
+            <AddPillarForm
+              onCancel={() => setIsAddingPillar(false)}
+              onSubmit={handleAddSupportPillar}
+            />
+          ) : (
+            supportPillars.map((pillar) => {
+              const IconComponent = iconMap[pillar.title] || BookMarked;
+              return (
+                <SupportPillarCard
+                  key={pillar.id}
+                  title={pillar.title}
+                  Icon={IconComponent}
+                />
+              );
+            })
+          )}
         </div>
       </div>
     </div>
