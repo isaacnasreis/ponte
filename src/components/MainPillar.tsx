@@ -1,10 +1,11 @@
-import { Flag, ArrowRight } from "lucide-react";
+import { ArrowRight, Edit3, Flag } from "lucide-react";
 
 type MainPillarProps = {
   title: string;
   description: string;
   progress: number;
   nextMilestone: string;
+  onEditClick: () => void;
 };
 
 export function MainPillar({
@@ -12,13 +13,26 @@ export function MainPillar({
   description,
   progress,
   nextMilestone,
+  onEditClick,
 }: MainPillarProps) {
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-subtle flex flex-col gap-4">
+    <div className="bg-white p-8 rounded-2xl shadow-subtle flex flex-col gap-4 relative">
+      <button
+        onClick={onEditClick}
+        className="absolute top-4 right-4 text-gray-400 hover:text-primary transition-colors cursor-pointer"
+        title="Editar pilar principal"
+      >
+        <Edit3 size={20} />
+      </button>
+
       <h1 className="font-heading text-3xl font-bold text-text">{title}</h1>
       <p className="font-body text-gray-500">{description}</p>
 
-      <div className="mt-4 space-y-4">
+      <div
+        className="mt-4 space-y-4 cursor-pointer"
+        onClick={onEditClick}
+        title="Clique para atualizar o progresso"
+      >
         <div className="w-full bg-neutral-light rounded-full h-1.5">
           <div
             className="bg-primary h-1.5 rounded-full"

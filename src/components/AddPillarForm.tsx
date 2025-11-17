@@ -37,14 +37,14 @@ export function AddPillarForm({ onCancel, onSubmit }: AddPillarFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600"
+          className="px-4 py-2 text-gray-600 cursor-pointer"
           disabled={isSubmitting}
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:bg-opacity-50"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:bg-opacity-50 cursor-pointer"
           disabled={isSubmitting || !title.trim()}
         >
           {isSubmitting ? "Salvando..." : "Salvar"}

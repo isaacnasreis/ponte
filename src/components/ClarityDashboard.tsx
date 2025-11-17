@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddPillarForm } from "./AddPillarForm";
+import { EditMainPillarForm } from "./EditMainPillarForm";
 import { MainPillar } from "./MainPillar";
 import { SupportPillarCard } from "./SupportPillarCard";
 
@@ -21,6 +22,7 @@ const iconMap: { [key: string]: LucideIcon } = {
 export function ClarityDashboard() {
   const pillars = useLiveQuery(() => db.pillars.toArray(), []);
   const [isAddingPillar, setIsAddingPillar] = useState(false);
+  const [isEditingMainPillar, setIsEditingMainPillar] = useState(false);
 
   useEffect(() => {
     populate();
@@ -39,6 +41,23 @@ export function ClarityDashboard() {
     }
   };
 
+  const handleUpdateMainPillar = async (updatedData: {
+    progress: number;
+    nextMilestone: string;
+  }) => {
+    if (!mainPillar || mainPillar.id === undefined) return;
+
+    try {
+      await db.pillars.update(mainPillar.id, {
+        progress: updatedData.progress,
+        next_milestone: updatedData.nextMilestone,
+      });
+      setIsEditingMainPillar(false);
+    } catch (error) {
+      console.error("Falha ao atualizar o pilar principal:", error);
+    }
+  };
+
   if (!pillars) {
     return <div className="text-center py-16">Carregando seus pilares...</div>;
   }
@@ -50,12 +69,19 @@ export function ClarityDashboard() {
     <div className="max-w-6xl mx-auto px-4 py-16">
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-[2]">
-          {mainPillar ? (
+          {isEditingMainPillar && mainPillar ? (
+            <EditMainPillarForm
+              pillar={mainPillar}
+              onCancel={() => setIsEditingMainPillar(false)}
+              onSubmit={handleUpdateMainPillar}
+            />
+          ) : mainPillar ? (
             <MainPillar
               title={mainPillar.title}
               description={mainPillar.description || ""}
               progress={mainPillar.progress || 0}
               nextMilestone={mainPillar.next_milestone || ""}
+              onEditClick={() => setIsEditingMainPillar(true)}
             />
           ) : (
             <p>Nenhum pilar principal definido.</p>
@@ -69,8 +95,10 @@ export function ClarityDashboard() {
             </h2>
             <button
               onClick={() => setIsAddingPillar(true)}
-              className="text-primary hover:text-opacity-80 transition-colors"
+              className="text-primary hover:text-opacity-80 transition-colors cursor-pointer"
+              aria-label="Adicionar novo pilar de suporte"
               title="Adicionar novo pilar de suporte"
+              disabled={isAddingPillar || isEditingMainPillar}
             >
               <PlusCircle size={24} />
             </button>
