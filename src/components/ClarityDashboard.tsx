@@ -58,6 +58,22 @@ export function ClarityDashboard() {
     }
   };
 
+  const handleDeletePillar = async (id?: number) => {
+    if (id === undefined) return;
+
+    const isConfirmed = window.confirm(
+      "Tem a certeza que quer eliminar este pilar?"
+    );
+
+    if (isConfirmed) {
+      try {
+        await db.pillars.delete(id);
+      } catch (error) {
+        console.error("Falha ao eliminar o pilar:", error);
+      }
+    }
+  };
+
   if (!pillars) {
     return <div className="text-center py-16">Carregando seus pilares...</div>;
   }
@@ -117,6 +133,7 @@ export function ClarityDashboard() {
                   key={pillar.id}
                   title={pillar.title}
                   Icon={IconComponent}
+                  onDelete={() => handleDeletePillar(pillar.id)}
                 />
               );
             })
